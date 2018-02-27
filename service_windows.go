@@ -1,16 +1,20 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 
-	"github.com/kardianos/osext"
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/eventlog"
 	"golang.org/x/sys/windows/svc/mgr"
 )
 
 func newService(c *Config) (*windowsService, error) {
+	if c.Config.Path == "" || !FileExists(c.Path) {
+		return nil, errors.New("executable path does not exist or wasnt set")
+	}
 	return &windowsService{
+		Config:      c,
 		name:        c.Name,
 		displayName: c.DisplayName,
 		description: c.Description,
@@ -18,9 +22,13 @@ func newService(c *Config) (*windowsService, error) {
 }
 
 type windowsService struct {
-	name, displayName, description string
-	onStart, onStop                func() error
-	logger                         *eventlog.Log
+	*Config
+	name        string
+	displayName string
+	description string
+	onStart     func() error
+	onStop      func() error
+	logger      *eventlog.Log
 }
 
 const version = "Windows Service"
@@ -62,12 +70,7 @@ loop:
 }
 
 func (ws *windowsService) Install() error {
-	exepath, err := osext.Executable()
-	if err != nil {
-		return err
-	}
-	// Used if path contains a space.
-	exepath = `"` + exepath + `"`
+	exepath := `"` + ws.Config.Path + `"`
 	m, err := mgr.Connect()
 	if err != nil {
 		return err

@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log/syslog"
@@ -11,8 +12,6 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
-
-	"github.com/kardianos/osext"
 )
 
 const (
@@ -61,11 +60,14 @@ func newService(c *Config) (Service, error) {
 	if err != nil {
 		return nil, err
 	}
+	if c.Config.Path == "" || !FileExists(c.Path) {
+		return nil, errors.New("executable path does not exist or wasnt set")
+	}
 	s := &linuxService{
 		flavor:      flavor,
 		name:        c.Name,
 		displayName: c.DisplayName,
-		description: c.Description,
+		Config:      c,
 	}
 	s.logger, err = syslog.New(syslog.LOG_INFO, s.name)
 	if err != nil {
@@ -75,9 +77,12 @@ func newService(c *Config) (Service, error) {
 }
 
 type linuxService struct {
-	flavor                         initFlavor
-	name, displayName, description string
-	logger                         *syslog.Writer
+	*Config
+	flavor      initFlavor
+	name        string
+	displayName string
+	description string
+	logger      *syslog.Writer
 }
 
 func (ls *linuxService) String() string {
@@ -138,11 +143,6 @@ func (s *linuxService) Install() error {
 	}
 	defer f.Close()
 
-	path, err := osext.Executable()
-	if err != nil {
-		return err
-	}
-
 	var to = &struct {
 		Display     string
 		Description string
@@ -150,7 +150,7 @@ func (s *linuxService) Install() error {
 	}{
 		s.displayName,
 		s.description,
-		path,
+		s.Config.Path,
 	}
 
 	err = s.flavor.GetTemplate().Execute(f, to)

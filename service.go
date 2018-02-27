@@ -2,7 +2,11 @@
 // Currently supports Windows, Linux/(systemd | Upstart | SysV), and OSX/Launchd.
 package service
 
-import "github.com/kardianos/osext"
+import (
+	"os"
+
+	"github.com/kardianos/osext"
+)
 
 // Creates a new service. name is the internal name
 // and should not contain spaces. Display name is the pretty print
@@ -18,7 +22,11 @@ func NewService(name, displayName, description string) (Service, error) {
 
 // Alpha API. Do not yet use.
 type Config struct {
-	Name, DisplayName, Description string
+	Name        string
+	DisplayName string
+	Description string
+
+	Path string
 
 	DarwinIntervalJob bool // Job is an interval job in launchd
 	DarwinInterval    int  // Interval to use for interval job
@@ -152,4 +160,11 @@ type Logger interface {
 // image name.
 func GetExePath() (exePath string, err error) {
 	return osext.Executable()
+}
+
+func FileExists(path string) bool {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }
