@@ -14,9 +14,6 @@ import (
 const maxPathSize = 32 * 1024
 
 func newService(c *Config) (s *darwinLaunchdService, err error) {
-	if c.Path == "" || !FileExists(c.Path) {
-		return nil, errors.New("executable path does not exist or wasnt set")
-	}
 	s = &darwinLaunchdService{
 		Config: c,
 	}
@@ -59,6 +56,10 @@ func (s *darwinLaunchdService) Install() error {
 	_, err = os.Stat(confPath)
 	if err == nil {
 		return fmt.Errorf("Init already exists: %s", confPath)
+	}
+
+	if s.Path == "" || !FileExists(s.Path) {
+		return errors.New("executable path does not exist or wasnt set")
 	}
 
 	f, err := os.Create(confPath)
