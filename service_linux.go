@@ -60,7 +60,7 @@ func newService(c *Config) (Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	if c.Config.Path == "" || !FileExists(c.Path) {
+	if c.Path == "" || !FileExists(c.Path) {
 		return nil, errors.New("executable path does not exist or wasnt set")
 	}
 	s := &linuxService{
@@ -150,7 +150,7 @@ func (s *linuxService) Install() error {
 	}{
 		s.displayName,
 		s.description,
-		s.Config.Path,
+		s.Path,
 	}
 
 	err = s.flavor.GetTemplate().Execute(f, to)

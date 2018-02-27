@@ -14,7 +14,7 @@ import (
 const maxPathSize = 32 * 1024
 
 func newService(c *Config) (s *darwinLaunchdService, err error) {
-	if c.Config.Path == "" || !FileExists(c.Path) {
+	if c.Path == "" || !FileExists(c.Path) {
 		return nil, errors.New("executable path does not exist or wasnt set")
 	}
 	s = &darwinLaunchdService{
@@ -75,7 +75,7 @@ func (s *darwinLaunchdService) Install() error {
 		KeepAlive, RunAtLoad bool
 	}{
 		Config:         s.Config,
-		Path:           s.Config.Path,
+		Path:           s.Path,
 		DarwinInterval: s.DarwinInterval,
 		KeepAlive:      s.KV.bool("KeepAlive", true),
 		RunAtLoad:      s.KV.bool("RunAtLoad", false),

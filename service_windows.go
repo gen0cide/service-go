@@ -10,7 +10,7 @@ import (
 )
 
 func newService(c *Config) (*windowsService, error) {
-	if c.Config.Path == "" || !FileExists(c.Path) {
+	if c.Path == "" || !FileExists(c.Path) {
 		return nil, errors.New("executable path does not exist or wasnt set")
 	}
 	return &windowsService{
@@ -70,7 +70,7 @@ loop:
 }
 
 func (ws *windowsService) Install() error {
-	exepath := `"` + ws.Config.Path + `"`
+	exepath := `"` + ws.Path + `"`
 	m, err := mgr.Connect()
 	if err != nil {
 		return err
