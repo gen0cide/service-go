@@ -70,7 +70,7 @@ func (ws *windowsService) Install() error {
 	if ws.Path == "" || !FileExists(ws.Path) {
 		return errors.New("executable path does not exist or wasnt set")
 	}
-	exepath := `"` + ws.Path + `"`
+	exepath := ws.Path
 	m, err := mgr.Connect()
 	if err != nil {
 		return err
