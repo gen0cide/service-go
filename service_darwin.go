@@ -79,7 +79,7 @@ func (s *darwinLaunchdService) Install() error {
 		Path:           s.Path,
 		DarwinInterval: s.DarwinInterval,
 		KeepAlive:      s.KV.bool("KeepAlive", true),
-		RunAtLoad:      s.KV.bool("RunAtLoad", false),
+		RunAtLoad:      s.KV.bool("RunAtLoad", true),
 	}
 
 	functions := template.FuncMap{
